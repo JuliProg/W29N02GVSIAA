@@ -24,9 +24,9 @@ Dependency injection, DI based on MEF framework is used to connect the chip to t
 
         ChipAssembly()
         {
-            myChip.devManuf = "SAMSUNG";
+            myChip.devManuf = "WINBOND";
             myChip.name = "W29N02GVSIAA";
-            myChip.chipID = "ECDA101544";      // device ID - ECh DAh 10h 15h 44h (K9F2G08UOC-SCBO_C40316.pdf page 28)
+            myChip.chipID = "EFDA909504";      // device ID - EFh DAh 90h 95h 04h (w29n02gv_reva.pdf page 26)
 
             myChip.width = Organization.x8;    // chip width - 8 bit
             myChip.bytesPP = 2048;             // page size - 2048 byte (2Kb)
@@ -45,10 +45,10 @@ Dependency injection, DI based on MEF framework is used to connect the chip to t
 
             //------- Add chip operations    https://github.com/JuliProg/Wiki#command-set----------------------------------------------------
 
-            myChip.Operations("Reset_FFh").
-                   Operations("Erase_60h_D0h").
-                   Operations("Read_00h_30h").
-                   Operations("PageProgram_80h_10h");
+            myChip.Operations("Reset_FFh").                   // https://github.com/JuliProg/Wiki/wiki/Command-Sets#reset_ffhdll
+                   Operations("Erase_60h_D0h").               // https://github.com/JuliProg/Wiki/wiki/Command-Sets#erase_60h_d0hdll
+                   Operations("Read_00h_30h").                // https://github.com/JuliProg/Wiki/wiki/Command-Sets#read_00h_30hdll
+                   Operations("PageProgram_80h_10h");         // https://github.com/JuliProg/Wiki/wiki/Command-Sets#pageprogram_80h_10hdll
 
 ```
 # Chip registers (optional)
@@ -60,8 +60,8 @@ Dependency injection, DI based on MEF framework is used to connect the chip to t
             myChip.registers.Add(                   // https://github.com/JuliProg/Wiki/wiki/StatusRegister
                 "Status Register").
                 Size(1).
-                Operations("ReadStatus_70h").
-                Interpretation("SR_Interpreted").
+                Operations("ReadStatus_70h").       // https://github.com/JuliProg/Wiki/wiki/Status-Register-operations#readstatus_70hdll
+                Interpretation("SR_Interpreted").   // https://github.com/JuliProg/Wiki/wiki/Status-Register-Interpretation
                 UseAsStatusRegister();
 
 
@@ -69,8 +69,15 @@ Dependency injection, DI based on MEF framework is used to connect the chip to t
             myChip.registers.Add(                  // https://github.com/JuliProg/Wiki/wiki/ID-Register
                 "Id Register").
                 Size(5).
-                Operations("ReadId_90h").               
+                Operations("ReadId_90h").          // https://github.com/JuliProg/Wiki/wiki/ID-Register-operations#readid_90hdll     
                 Interpretation(ID_interpreting);
+            
+           
+            myChip.registers.Add(                  
+                "UNIQUE ID Register").
+                Size(16).
+                Operations("ReadUniqueId_EDh");              
+                
 
 ```
 # Interpretation of ID-register values ​​(optional)
@@ -81,6 +88,7 @@ Dependency injection, DI based on MEF framework is used to connect the chip to t
         
 ```
 </section>
+
 
 
 
