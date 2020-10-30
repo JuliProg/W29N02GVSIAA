@@ -26,9 +26,9 @@ namespace W29N02GVSIAA
 
         ChipAssembly()
         {
-            myChip.devManuf = "SAMSUNG";
+            myChip.devManuf = "WINBOND";
             myChip.name = "W29N02GVSIAA";
-            myChip.chipID = "ECDA101544";      // device ID - ECh DAh 10h 15h 44h (K9F2G08UOC-SCBO_C40316.pdf page 28)
+            myChip.chipID = "EFDA909504";      // device ID - EFh DAh 90h 95h 04h (w29n02gv_reva.pdf page 26)
 
             myChip.width = Organization.x8;    // chip width - 8 bit
             myChip.bytesPP = 2048;             // page size - 2048 byte (2Kb)
@@ -47,10 +47,10 @@ namespace W29N02GVSIAA
 
             //------- Add chip operations    https://github.com/JuliProg/Wiki#command-set----------------------------------------------------
 
-            myChip.Operations("Reset_FFh").
-                   Operations("Erase_60h_D0h").
-                   Operations("Read_00h_30h").
-                   Operations("PageProgram_80h_10h");
+            myChip.Operations("Reset_FFh").                   // https://github.com/JuliProg/Wiki/wiki/Command-Sets#reset_ffhdll
+                   Operations("Erase_60h_D0h").               // https://github.com/JuliProg/Wiki/wiki/Command-Sets#erase_60h_d0hdll
+                   Operations("Read_00h_30h").                // https://github.com/JuliProg/Wiki/wiki/Command-Sets#read_00h_30hdll
+                   Operations("PageProgram_80h_10h");         // https://github.com/JuliProg/Wiki/wiki/Command-Sets#pageprogram_80h_10hdll
 
             #endregion
 
@@ -63,8 +63,8 @@ namespace W29N02GVSIAA
             myChip.registers.Add(                   // https://github.com/JuliProg/Wiki/wiki/StatusRegister
                 "Status Register").
                 Size(1).
-                Operations("ReadStatus_70h").
-                Interpretation("SR_Interpreted").
+                Operations("ReadStatus_70h").       // https://github.com/JuliProg/Wiki/wiki/Status-Register-operations#readstatus_70hdll
+                Interpretation("SR_Interpreted").   // https://github.com/JuliProg/Wiki/wiki/Status-Register-Interpretation
                 UseAsStatusRegister();
 
 
@@ -72,8 +72,15 @@ namespace W29N02GVSIAA
             myChip.registers.Add(                  // https://github.com/JuliProg/Wiki/wiki/ID-Register
                 "Id Register").
                 Size(5).
-                Operations("ReadId_90h").               
+                Operations("ReadId_90h").          // https://github.com/JuliProg/Wiki/wiki/ID-Register-operations#readid_90hdll     
                 Interpretation(ID_interpreting);
+            
+           
+            myChip.registers.Add(                  
+                "UNIQUE ID Register").
+                Size(16).
+                Operations("ReadUniqueId_EDh");              
+                
 
             #endregion
 
@@ -118,10 +125,10 @@ namespace W29N02GVSIAA
             {
                 case 0:
                     str_result += "Maker ";
-                    if (bt == 0xEC)
-                        str_result += "is Samsung";
+                    if (bt == 0xEF)
+                        str_result += "is Winbond";
                     else
-                        str_result += "is not Samsung";
+                        str_result += "is not Winbond";
                     str_result += Environment.NewLine;
                     break;
 
@@ -135,143 +142,34 @@ namespace W29N02GVSIAA
                     break;
 
                 case 2:
-                    str_result += " Internal Chip Number = ";
-                    if (IO[1] == false && IO[0] == false)
-                        str_result += "1";
-                    if (IO[1] == false && IO[0] == true)
-                        str_result += "2";
-                    if (IO[1] == true && IO[0] == false)
-                        str_result += "4";
-                    if (IO[1] == true && IO[0] == true)
-                        str_result += "8";
-                    str_result += Environment.NewLine;
-
-
-                    str_result += " Cell Type = ";
-                    if (IO[3] == false && IO[2] == false)
-                        str_result += "2 Level Cell";
-                    if (IO[3] == false && IO[2] == true)
-                        str_result += "4 Level Cell";
-                    if (IO[3] == true && IO[2] == false)
-                        str_result += "8 Level Cell";
-                    if (IO[3] == true && IO[2] == true)
-                        str_result += "16 Level Cell";
-                    str_result += Environment.NewLine;
-
-
-                    str_result += " Number of Simultaneously Programmed Pages = ";
-                    if (IO[5] == false && IO[4] == false)
-                        str_result += "1";
-                    if (IO[5] == false && IO[4] == true)
-                        str_result += "2";
-                    if (IO[5] == true && IO[4] == false)
-                        str_result += "4";
-                    if (IO[5] == true && IO[4] == true)
-                        str_result += "8";
-                    str_result += Environment.NewLine;
-
-
-                    str_result += " Interleave Program Between multiple chips = ";
-                    if (IO[6] == false)
-                        str_result += "Not Support";
-                    if (IO[6] == true)
-                        str_result += "Support";
-                    str_result += Environment.NewLine;
-
-                    str_result += " Cache Program = ";
-                    if (IO[7] == false)
-                        str_result += "Not Support";
-                    if (IO[7] == true)
-                        str_result += "Support";
+                    
+                    if (bt == 0x90)
+                        str_result += "Cach Programming Supported";
+                    else
+                        str_result += "Not define";
                     str_result += Environment.NewLine;
                     break;
+                    
 
                 case 3:
-
-                    str_result += " Page Size (w/o redundant area ) = ";
-                    if (IO[1] == false && IO[0] == false)
-                        str_result += "1KB";
-                    if (IO[1] == false && IO[0] == true)
-                        str_result += "2KB";
-                    if (IO[1] == true && IO[0] == false)
-                        str_result += "4KB";
-                    if (IO[1] == true && IO[0] == true)
-                        str_result += "8KB";
-                    str_result += Environment.NewLine;
-
-
-                    str_result += " Block Size (w/o redundant area ) = ";
-                    if (IO[5] == false && IO[4] == false)
-                        str_result += "64KB";
-                    if (IO[5] == false && IO[4] == true)
-                        str_result += "128KB";
-                    if (IO[5] == true && IO[4] == false)
-                        str_result += "256KB";
-                    if (IO[5] == true && IO[4] == true)
-                        str_result += "512KB";
-                    str_result += Environment.NewLine;
-
-
-                    str_result += " Redundant Area Size ( byte/512byte) = ";
-                    if (IO[2] == false)
-                        str_result += "8";
-                    if (IO[2] == true)
-                        str_result += "16";
-                    str_result += Environment.NewLine;
-
-
-                    str_result += " Organization = ";
-                    if (IO[6] == false)
-                        str_result += "x8";
-                    if (IO[6] == true)
-                        str_result += "x16";
-                    str_result += Environment.NewLine;
-
-                    str_result += " Serial Access Minimum = ";
-                    if (IO[7] == false && IO[3] == false)
-                        str_result += "50ns/30ns";
-                    if (IO[7] == true && IO[3] == false)
-                        str_result += "25ns";
-                    if (IO[7] == false && IO[3] == true)
-                        str_result += "Reserved";
-                    if (IO[7] == true && IO[3] == true)
-                        str_result += "Reserved";
+                    if (bt == 0x95)
+                    {
+                        str_result += "Page Size:2KB \r\n";
+                        str_result += "Spare Area Size:64b \r\n";
+                        str_result += "BLK Size w/o Spare:128KB \r\n";
+                        str_result += "Organized:x8 or x16 \r\n";
+                        str_result += "Serial Access:25ns \r\n";
+                    }                   
+                    else
+                        str_result += "Not define";
+                    
                     str_result += Environment.NewLine;
                     break;
 
                 case 4:
-
-                    str_result += " Plane Number = ";
-                    if (IO[3] == false && IO[2] == false)
-                        str_result += "1";
-                    if (IO[3] == false && IO[2] == true)
-                        str_result += "2";
-                    if (IO[3] == true && IO[2] == false)
-                        str_result += "4";
-                    if (IO[3] == true && IO[2] == true)
-                        str_result += "8";
+                    
+                    str_result += "Not define";
                     str_result += Environment.NewLine;
-
-
-                    str_result += " Plane Size (w/o redundant area ) = ";
-                    if (IO[6] == false && IO[5] == false && IO[4] == false)
-                        str_result += "64Mb";
-                    if (IO[6] == false && IO[5] == false && IO[4] == true)
-                        str_result += "128Mb";
-                    if (IO[6] == false && IO[5] == true && IO[4] == false)
-                        str_result += "256Mb";
-                    if (IO[6] == false && IO[5] == true && IO[4] == true)
-                        str_result += "512Mb";
-                    if (IO[6] == true && IO[5] == false && IO[4] == false)
-                        str_result += "1Gb";
-                    if (IO[6] == true && IO[5] == false && IO[4] == true)
-                        str_result += "2Gb";
-                    if (IO[6] == true && IO[5] == true && IO[4] == false)
-                        str_result += "4Gb";
-                    if (IO[6] == true && IO[5] == true && IO[4] == true)
-                        str_result += "8Gb";
-                    str_result += Environment.NewLine;
-
 
                     break;
             }
