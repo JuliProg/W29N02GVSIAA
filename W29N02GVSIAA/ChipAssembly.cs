@@ -76,10 +76,10 @@ namespace W29N02GVSIAA
                 Interpretation(ID_interpreting);
             
            
-            myChip.registers.Add(                  
+            myChip.registers.Add(                  // https://github.com/JuliProg/Wiki/wiki/UNIQUE-ID-Register
                 "UNIQUE ID Register").
                 Size(16).
-                Operations("ReadUniqueId_EDh");              
+                Operations("ReadUniqueId_EDh");     // https://github.com/JuliProg/Wiki/wiki/UNIQUE-ID-Register-operations         
                 
 
             #endregion
