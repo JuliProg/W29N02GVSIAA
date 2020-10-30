@@ -73,10 +73,10 @@ Dependency injection, DI based on MEF framework is used to connect the chip to t
                 Interpretation(ID_interpreting);
             
            
-            myChip.registers.Add(                  
+            myChip.registers.Add(                  // https://github.com/JuliProg/Wiki/wiki/UNIQUE-ID-Register
                 "UNIQUE ID Register").
                 Size(16).
-                Operations("ReadUniqueId_EDh");              
+                Operations("ReadUniqueId_EDh");     // https://github.com/JuliProg/Wiki/wiki/UNIQUE-ID-Register-operations         
                 
 
 ```
@@ -88,6 +88,7 @@ Dependency injection, DI based on MEF framework is used to connect the chip to t
         
 ```
 </section>
+
 
 
 
